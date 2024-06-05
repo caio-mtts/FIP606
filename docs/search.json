@@ -2,13 +2,13 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "FIP 606 - Caio M. Pereira",
+    "title": "FIP 606 | por Caio M.",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2",
+    "text": "Este é um site baseado em Quarto. Ele foi criado para armazenar e compartilhar as informações geradas ao longo das aulas da disciplina FIP 606 - Análise e Visualização de Dados em Fitopatologia, oferecida pelo prof. Emerson Del Ponte e cursada durante o primeiro semestre de 2024.",
     "crumbs": [
       "Home",
       "Basics",
-      "FIP 606 - Caio M. Pereira"
+      "FIP 606 | por Caio M."
     ]
   },
   {
@@ -16,7 +16,7 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
+    "text": "Site criado para hospedar os dados gerados ao longo da disciplina FIP 606 - Análise e Visualização de Dados em Fitopatologia."
   },
   {
     "objectID": "Aula 10.html",
