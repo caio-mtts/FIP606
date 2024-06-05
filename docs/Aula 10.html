@@ -126,7 +126,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-sidebar docked nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -144,7 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
@@ -157,10 +157,75 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Aula 10.html">Análises</a></li><li class="breadcrumb-item"><a href="./Aula 10.html">Aula 10</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Basics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FIP 606 - Caio M. Pereira</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">basics-knitr.qmd</span>
+  </li>
+          <li class="sidebar-item">
+ <span class="menu-text">basics-jupyter.qmd</span>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Análises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Aula 10.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Aula 10</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -194,7 +259,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Aula 10.html">Análises</a></li><li class="breadcrumb-item"><a href="./Aula 10.html">Aula 10</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Aula 10</h1>
 </div>
@@ -869,8 +934,8 @@ e:1:50 0.579757   0.013332 0.537328 0.622187</code></pre>
 <span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DT)</span>
 <span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a><span class="fu">datatable</span>(df_ec50)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-a6b8d0a2827daabd8c9f" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-a6b8d0a2827daabd8c9f">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],["152","153","164","165","169","170","186","187","188","189","FGT05","FGT06","FGT07","FGT28","FGT29","FGT33","FGT34","FGT35","FGT42","FGT43"],["","","","","","","","","","","","","","","","","","","",""],[0.4443562921134181,0.2037966428294141,0.5077584385578893,0.5583961307217543,0.1472231103670195,0.375038891910268,0.5797574354294909,0.2156333836945371,0.1529717175030145,0.5310619333335561,0.04483862111325968,0.5449794616939213,0.8877005267670349,0.2260814114629881,0.2360165168159889,0.1048162725943343,0.1477311423537533,0.2031539246265511,0.4500055864313668,0.4958954876770452],[0.07778923986155871,0.04237351183067169,0.04724826570185957,0.1141951132324397,0.009555687975666576,0.04320732845193305,0.01333226808004392,0.03663944561893181,0.004284690501602993,0.02313093593948798,0.01929089015844035,0.03483460212348276,0.07991770412951832,0.03360074200920896,0.03493388051850937,0.01306522050908054,0.04700337288810025,0.0389846040830016,0.05968588958303524,0.06085077057586942],[0.1967962131251725,0.06894521666199757,0.3573933699439433,0.1949763145337218,0.1168126464744155,0.237533889117234,0.5373282081371031,0.09903031535692423,0.1393359200469039,0.4574489717151785,-0.01655360099710266,0.4341202108700156,0.6333667245332928,0.11914885420099,0.1248413178306362,0.06323690985749403,-0.001854568029853731,0.07908751539965447,0.260058447650265,0.302241177684203],[0.6919163711016638,0.3386480689968308,0.6581235071718352,0.9218159469097869,0.1776335742596236,0.5125438947033019,0.6221866627218786,0.33223645203215,0.1666075149591251,0.6046748949519338,0.106230843223622,0.655838712517827,1.142034329000777,0.3330139687249862,0.3471917158013415,0.1463956353311746,0.2973168527373604,0.3272203338534477,0.6399527252124686,0.6895497976698874]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>strata<\/th>\n      <th>Estimate<\/th>\n      <th>Std..Error<\/th>\n      <th>Lower<\/th>\n      <th>Upper<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"strata","targets":2},{"name":"Estimate","targets":3},{"name":"Std..Error","targets":4},{"name":"Lower","targets":5},{"name":"Upper","targets":6}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-36668fb6a5fac192b7be" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-36668fb6a5fac192b7be">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],["152","153","164","165","169","170","186","187","188","189","FGT05","FGT06","FGT07","FGT28","FGT29","FGT33","FGT34","FGT35","FGT42","FGT43"],["","","","","","","","","","","","","","","","","","","",""],[0.4443562921134181,0.2037966428294141,0.5077584385578893,0.5583961307217543,0.1472231103670195,0.375038891910268,0.5797574354294909,0.2156333836945371,0.1529717175030145,0.5310619333335561,0.04483862111325968,0.5449794616939213,0.8877005267670349,0.2260814114629881,0.2360165168159889,0.1048162725943343,0.1477311423537533,0.2031539246265511,0.4500055864313668,0.4958954876770452],[0.07778923986155871,0.04237351183067169,0.04724826570185957,0.1141951132324397,0.009555687975666576,0.04320732845193305,0.01333226808004392,0.03663944561893181,0.004284690501602993,0.02313093593948798,0.01929089015844035,0.03483460212348276,0.07991770412951832,0.03360074200920896,0.03493388051850937,0.01306522050908054,0.04700337288810025,0.0389846040830016,0.05968588958303524,0.06085077057586942],[0.1967962131251725,0.06894521666199757,0.3573933699439433,0.1949763145337218,0.1168126464744155,0.237533889117234,0.5373282081371031,0.09903031535692423,0.1393359200469039,0.4574489717151785,-0.01655360099710266,0.4341202108700156,0.6333667245332928,0.11914885420099,0.1248413178306362,0.06323690985749403,-0.001854568029853731,0.07908751539965447,0.260058447650265,0.302241177684203],[0.6919163711016638,0.3386480689968308,0.6581235071718352,0.9218159469097869,0.1776335742596236,0.5125438947033019,0.6221866627218786,0.33223645203215,0.1666075149591251,0.6046748949519338,0.106230843223622,0.655838712517827,1.142034329000777,0.3330139687249862,0.3471917158013415,0.1463956353311746,0.2973168527373604,0.3272203338534477,0.6399527252124686,0.6895497976698874]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>strata<\/th>\n      <th>Estimate<\/th>\n      <th>Std..Error<\/th>\n      <th>Lower<\/th>\n      <th>Upper<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[3,4,5,6]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"strata","targets":2},{"name":"Estimate","targets":3},{"name":"Std..Error","targets":4},{"name":"Lower","targets":5},{"name":"Upper","targets":6}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p>Problema, não é possível selecionar a função de cada modelo para melhor se adequar a cada tratamento.</p>
