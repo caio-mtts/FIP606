@@ -1,0 +1,487 @@
+---
+title: "Aula 9"
+author: "Caio"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+---
+
+# Aula 9
+
+## Carregando pacotes
+
+```{r}
+library(gsheet)
+library(tidyverse)
+library(lme4)
+library(car)
+library(performance)
+library(DHARMa)
+library(emmeans)
+library(multcomp)
+library(multcompView)
+library(patchwork)
+library(r4pde)
+```
+
+## Análise de um experimento em parcelas subdivididas
+
+Experimentos em parcelas subdivididas são utilizados quando o nível de um fator primário (ou tratamento) é aplicado a uma parcela relativamente grande e todos os níveis de um segundo fator secundário são aplicados às subparcelas desta parcela maior. Os tratamentos primários são distribuídos às parcelas de acordo com um delineamento especificado, já os tratamentos secundários são distribuídos às subparcelas de forma aleatória.\
+
+## Importando os dados
+
+Para exemplificar a análise de um experimento em parcelas subdivididas, será utilizado um conjunto de dados onde o objetivo foi avaliar o índice de doença e produtividade de híbridos de milho (fator primário) ao serem submetidos a dois métodos de inoculação (fator secundário). Um esboço desse arranjo experimental é apresentado abaixo.
+
+![Experimento em parcelas subdivididas.](Imagem1.png){width="1650"}
+
+```{r}
+milho <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=1345524759")
+```
+
+```{r}
+glimpse(milho)
+```
+
+## Visualização gráfica
+
+### Índice de doença
+
+Para visualização dos dados relacionados ao índice de doença e o método de inoculação será construído um gráfico de pontos (`geom_jitter`) acrescido do intervalo de confiança (`stat_summary(fund.data = "mean_cl_boot"`). Para gerar uma figura com os gráficos individuais de cada tratamento é utilizada a função `facet_wrap`.
+
+```{r}
+milho %>% 
+  ggplot(aes(method, index))+
+  geom_jitter(color = "darkred", width = 0.1, alpha = 0.4)+
+  stat_summary(fund.data = "mean_cl_boot", color = "black", width = 0.5)+
+  facet_wrap (~hybrid)
+```
+
+### Produtividade
+
+Para os dados relacionados à produtividade e o método de inoculação será construído um gráfico de similar ao anterior.
+
+```{r}
+milho %>% 
+  ggplot(aes(method, yield))+
+  geom_jitter(color = "darkred", width = 0.1, alpha = 0.4)+
+  stat_summary(fund.data = "mean_cl_boot", color = "black", width = 0.5)+
+  facet_wrap (~hybrid)
+```
+
+## Análise em parcelas subdivididas
+
+## Índice de doença (index)
+
+### Construção do modelo
+
+Antes de definir o modelo, será preciso transformar a coluna de dados "block" para fator (funções `mutate` e `as.factor`).
+
+```{r}
+milho <- milho %>% 
+  mutate(block = as.factor(block))
+```
+
+Para a análise dos dados, será construído um modelo linear de efeitos mistos com a função `lmer` (pacote **`lme4`**), onde definimos os fatores fixos e os fatores aleatórios.
+
+```{r}
+mix <- lmer(index ~ hybrid*method + block + (1|block/hybrid),
+            data = milho)
+```
+
+### ANOVA
+
+```{r}
+Anova(mix)
+```
+
+A análise de variância demonstra que há interação entre os fatores (hybrid:method). Assim seria preciso realizar os desdobramentos e comparar híbridos dentro de métodos e métodos dentro de híbridos. Mas antes, é preciso conferir se os dados atendem às pressuposições da ANOVA.
+
+### Avaliação das premissas
+
+```{r}
+check_normality(mix)
+check_heteroscedasticity(mix)
+```
+
+```{r}
+plot(simulateResiduals(mix))
+```
+
+Com as análises acima, conclui-se que os dados seguem distribuição normal. Porém, não há homogeneidade de variância entre os grupos. Logo será preciso uma alternativa para prosseguir a análise, por exemplo a transformação dos dados com raiz quadrada.
+
+### Transformação dos dados - Raiz quadrada
+
+```{r}
+mix2 <- lmer(sqrt(index) ~ hybrid*method + block + (1|block/hybrid),
+            data = milho)
+```
+
+#### ANOVA - Dados transformados
+
+```{r}
+anova(mix2)
+```
+
+#### Avaliação das premissas - Dados transformados
+
+Com as funções `check_normality` e `check_heteroscedasticity` (pacote **`Performance`**):
+
+```{r}
+check_normality(mix2)
+check_heteroscedasticity(mix2)
+```
+
+Através de um gráfico Q-Q (funções `qqnorm` e `qqline`):
+
+```{r}
+qqnorm(residuals(mix2))
+qqline(residuals(mix2))
+```
+
+Com a função `simulateResiduals` (pacote **`DHARMa`**):
+
+```{r}
+plot(simulateResiduals(mix2))
+```
+
+Apesar da análise via **`DHARMa`** ter apresentado problemas, as demais avaliações (via **`Performance`** e QQ-Plot) se mostraram favoráveis, logo é possível prosseguir para a comparação de médias.
+
+#### Comparação de médias - Dados transformados
+
+Como visto pela ANOVA, há efeito de interação, logo será preciso realizar desdobramentos para as comparações:
+
+##### Híbridos dentro de métodos:
+
+```{r}
+index <- emmeans(mix2, ~hybrid | method,
+                 type = "response")
+
+cld(index, Letters = LETTERS)
+```
+
+##### Métodos dentro de híbridos
+
+```{r}
+index2 <- emmeans(mix2, ~method | hybrid,
+                  type = "response")
+
+cld(index2, Letters = letters)
+```
+
+## Produtividade (yield)
+
+Seguindo os mesmos procedimentos para o índice de doença, será conduzida avaliação da produtividade.
+
+### Construção do modelo
+
+```{r}
+mix3 <- lmer(yield ~ hybrid*method + block + (1|block/hybrid),
+            data = milho)
+```
+
+### ANOVA
+
+```{r}
+Anova(mix3)
+```
+
+### Avaliação das premissas
+
+```{r}
+check_normality(mix3)
+check_heteroscedasticity(mix3)
+```
+
+A análise pelas funções check_normality e check_heteroscedasticity demonstram que os dados possuem normalidade na distribuição dos resíduos, no entanto, não há homogeneidade de variância entre os grupos. Portanto, também será preciso realizar transformação.
+
+#### Transformação dos dados - Raiz quadrada
+
+```{r}
+mix4 <- lmer(sqrt(yield) ~ hybrid*method + block + (1|block/hybrid),
+            data = milho)
+```
+
+#### ANOVA - Dados transformados
+
+```{r}
+anova(mix4)
+```
+
+#### Avaliação das premissas - Dados transformados
+
+```{r}
+check_normality(mix4)
+check_heteroscedasticity(mix4)
+```
+
+#### Comparação de médias - Dados transformados
+
+##### Híbridos dentro de métodos:
+
+```{r}
+yield <- emmeans(mix4, ~ hybrid | method,
+                 type = "response")
+cld(index, Letters = LETTERS)
+```
+
+##### Métodos dentro de híbridos
+
+```{r}
+yield2 <- emmeans(mix4, ~ method | hybrid,
+                  type = "response")
+cld(index2, Letters = letters)
+```
+
+## Análise de Regressão Linear
+
+```{r}
+estande <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=401662555")
+
+estande <- estande %>% 
+  mutate(bloco = as.factor(bloco))
+```
+
+### Visualização gráfica
+
+```{r}
+estande %>% 
+  ggplot(aes(trat, nplants))+
+  geom_jitter(width = 0.2, alpha = 0.2, color = "darkred")+
+  stat_summary(fun.data = "mean_cl_boot")+
+  geom_smooth(method = "lm", se = FALSE)+
+  facet_wrap(~exp)
+```
+
+```{r}
+estande %>% 
+  ggplot(aes(trat, nplants))+
+  geom_jitter(width = 0.2, alpha = 0.2, color = "darkred")+
+  stat_summary(fun.data = "mean_cl_boot")+
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+### Comparação por experimentos
+
+#### Exp. 1
+
+```{r}
+exp1 <- estande %>% 
+  filter(exp == 1)
+
+exp1 %>% 
+  ggplot(aes(trat, nplants))+
+  geom_point()+
+  ylim (0,100)+
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+lm1 <- lm (nplants ~ trat,
+           data = exp1)
+summary(lm1)
+```
+
+#### Exp. 2
+
+```{r}
+exp2 <- estande %>% 
+  filter(exp == 2)
+
+exp2 %>% 
+  ggplot(aes(trat, nplants))+
+  geom_point()+
+  ylim (0,100)+
+  geom_smooth (se = FALSE)+
+  geom_smooth(method = "lm", se = FALSE, color = "red")
+```
+
+Uma opção para linearizar a curva seria aplicar log no tratamento (log(trat)).
+
+```{r}
+lm2 <- lm (nplants ~ trat,
+           data = exp2)
+summary(lm2)
+```
+
+#### Exp. 3
+
+```{r}
+exp3 <- estande %>% 
+  filter(exp == 3)
+
+exp1 %>% 
+  ggplot(aes(trat, nplants))+
+  geom_point()+
+  ylim (0,100)+
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+lm3 <- lm (nplants ~ trat,
+           data = exp3)
+summary(lm3)
+```
+
+```{r}
+glm1 <- glm(nplants ~ trat,
+            family = "gaussian",
+            data = exp1)
+
+summary(glm1)
+AIC(glm1)
+```
+
+```{r}
+glm2a <- glm(nplants ~ trat,
+            family = "gaussian",
+            data = exp2)
+
+summary(glm2a)
+AIC(glm2a)
+```
+
+```{r}
+glm2b <- glm(nplants ~ trat,
+            family = poisson(link = "log"),
+            data = exp2)
+
+summary(glm2b)
+AIC(glm2b)
+```
+
+```{r}
+glm3 <- glm(nplants ~ trat,
+            family = "gaussian",
+            data = exp3)
+
+summary(glm3)
+AIC(glm3)
+```
+
+```{r}
+glm3b <- glm(nplants ~ trat,
+            family = poisson(link = "log"),
+            data = exp3)
+
+summary(glm3b)
+AIC(glm3b)
+```
+
+Análise dos experimento como um conjuto
+
+```{r}
+glm_exp <- glmer(nplants ~ trat + (trat | exp),
+            family = "gaussian",
+            data = estande)
+
+summary(glm_exp)
+AIC(glm_exp)
+```
+
+```{r}
+glm_exp_2 <- glmer(nplants ~ trat + (trat | exp),
+            family = poisson(link = "log"),
+            data = estande)
+
+summary(glm_exp_2)
+AIC(glm_exp_2)
+```
+
+\_\_\_
+
+```{r}
+#| eval: false
+install.packages("pak")
+pak::pkg_install("Icens")
+pak::pkg_install("emdelponte/r4pde")
+```
+
+```{r}
+#| eval: false
+remotes::install_github("emdelponte/r4pde")
+```
+
+```{r}
+library(r4pde)
+wm <- WhiteMoldSoybean
+
+wm %>% 
+  ggplot (aes (inc, yld))+
+  geom_point()+
+  facet_wrap(~study)
+```
+
+Cálculo de coeficiente angular para todos os ensaios
+
+```{r}
+wm %>% 
+  ggplot (aes (inc, yld))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+
+mofo1 <- lm(yld ~ inc,
+            data = wm)
+summary(mofo1)
+```
+
+Cálculo de coeficiente angular para os ensaios individualmente
+
+```{r}
+wm %>% 
+  ggplot (aes (inc, yld, group = factor(study)))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F)
+```
+
+```{r}
+library(broom)
+mofo2 <- wm %>% 
+  group_by(study) %>% 
+  do(tidy(lm(.$study ~ .$inc), conf.int = TRUE))
+
+mofo2
+```
+
+```{r}
+df <- mofo2 %>% filter(term == ".$inc")
+mean(df$estimate)
+```
+
+```{r}
+p1 <- mofo2 %>% 
+  filter(term == "(Intercept)") %>% 
+  ggplot(aes(x = estimate))+
+  geom_histogram(bins = 8, color = "white", fill = "gray50")+
+  theme_r4pde()+
+  labs( x = "Intercept",
+        y = "Frequency")
+
+p1
+```
+
+```{r}
+p2 <- mofo2 %>% 
+  filter(term == ".$inc") %>%  
+  ggplot(aes(x = estimate))+
+  geom_histogram(bins = 8, color = "white", fill = "gray50")+
+  theme_r4pde()+
+  labs(x = "Slope", y = "Frequency")
+
+p2
+```
+
+```{r}
+library(patchwork)
+(p1+p2)
+```
+
+Modelo misto
+
+```{r}
+mofo3 <- lmer(yld ~ inc + (inc | study), data = wm,
+              REML = F)
+summary(mofo3)
+```

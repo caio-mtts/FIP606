@@ -1,0 +1,441 @@
+---
+title: "Aula 6 - Estatísticas inferenciais: teste-t e ANOVA"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+editor_options: 
+  chunk_output_type: console
+---
+
+# Aula 6
+
+Nesta aula serão apresentados alguns passos para condução da estatística inferencial. Inicialmente, serão conduzidos teste-t e, brevemente, alguns passos para realizar uma análise de variância (ANOVA).
+
+# Carregando os pacotes
+
+```{r}
+library(gsheet)
+library(tidyverse)
+library(report)
+```
+
+Pacotes utilizados para realizar ANOVA:
+
+```{r}
+library(emmeans)
+library(multcomp)
+library(multcompView)
+library(DHARMa)
+library(performance)
+```
+
+# Análise inferencial - Teste t
+
+## Obtenção dos dados
+
+Os dados serão importados de uma planilha online, utilizado a ferramenta `gsheet2tbl` (**`gsheet`**). O conjunto de dados é referente a avaliação do efeito da suplementação de magnésio (Mg~2~) sobre o comprimento de lesões.
+
+```{r}
+mg <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=983033137")
+
+glimpse(mg)
+```
+
+## Análise dos dados
+
+Inicialmente, será feito um gráfico do tipo boxplot para analisarmos o conjunto de dados visualmente.
+
+```{r}
+mg %>% 
+  ggplot(aes(trat, comp))+
+  geom_boxplot(width = 0.5)
+```
+
+O gráfico gerado sugere que há diferença no tamanho das lesões em função do tratamento avaliado. Onde a suplementação com Mg~2~ parece possuir efeito desejável, reduzindo o comprimento das lesões.\
+Além, o gráfico indica que os dados possuem distribuição normal, pois há simetria em ambos os retângulos; e que também homocedasticidade (homogeneidade das variâncias), já que os dois retângulos possuem tamanho semelhante.
+
+## Conversão dos dados
+
+Antes de realizar o teste-t será preciso transformar a tabela para o formato largo (cada tratamento em uma coluna), para isso será utilizada a função `pivot_wider` (**`tidyr`**):
+
+```{r}
+mg2 <- mg %>%
+  pivot_wider(names_from = trat,
+              values_from = comp)
+
+glimpse(mg2)
+```
+
+## Teste-t
+
+### Teste-t para duas amostras independentes
+
+Com base no conjunto de dados recém transformado, será feito um teste t (função `t.test`, nativa do R) para duas amostras independentes.
+
+```{r}
+t.test(mg2$Mg2, mg2$control)
+```
+
+A partir do resultado do teste, podemos concluir há diferença significativa entre os tratamentos, pois o valor de P foi extretamente baixo (\< 0.01).
+
+#### Verificação das premissas
+
+Para termos confiança no teste realizado é preciso saber se os dados atendem algumas premissas: se há normalidade entre os conjuntos; e se os conjuntos possuem mesma variância.
+
+#### Teste de normalidade:
+
+-   Histogramas\
+    Uma forma de se avaliar a normalidade visualmente é por meio de histograma:
+
+```{r}
+hist(mg2$control)
+hist(mg2$Mg2)
+```
+
+-   Q-Q Plot de normalidade
+
+    Outra opção é por meio de Q-Q plots:
+
+```{r}
+qqnorm(mg2$control)
+qqline(mg2$control)
+```
+
+```{r}
+qqnorm(mg2$Mg2)
+qqline(mg2$Mg2)
+```
+
+-   Avaliação estatística
+
+    A avaliação também pode ser feita utilizando testes estatísticos. Nesse caso, será aplicada a função `shapiro.test` (nativa do R):
+
+```{r}
+shapiro.test(mg2$control)
+shapiro.test(mg2$Mg2)
+```
+
+Ambas as metodologias demonstram que os dados possuem distribuição normal. Os histogramas possuem formato típico de um conjunto de dados normais. Nos Q-Q Plots, é possível notar que os pontos estão próximo a linha de normalidade. E pelos testes de Shapiro Wilk, não se rejeita a hipótese nula (de normalidade), já que valor de P é maior que o nível de significância adotado (⍺ = 5%).
+
+#### Teste de homogeneidade
+
+Para avaliação da homogeneidade entre as variâncias será utilizada a função `var.test` (também nativa do R):
+
+```{r}
+var.test(mg2$control, mg2$Mg2)
+```
+
+Com o resultado do teste não rejeitamos a hipótese nula (de homogeneidade entre as amostras), pois o valor de probabilidade é superior a 5%. Logo, os tratamentos possuem mesma variância.\
+\
+Com isso (dados normais, com variâncias homogêneas), podemos confiar no teste-t realizado.
+
+#### Apresentação dos resultados
+
+A função `report` (**`report`**) pode ser utilizada para gerar um modelo de texto, reportando os resultados obtidos. Para isso atribuímos o teste-t a um objeto e em sequência executamos a função.
+
+```{r}
+teste1 <- t.test(mg2$Mg2, mg2$control)
+report(teste1)
+```
+
+### Teste-t para duas amostras dependentes
+
+Para demonstrar a aplicação do test-t pareado (ou para amostras dependentes), utilizaremos um conjunto de dados no qual há resultados de avaliação de doenças antes e após o uso de uma escala de doenças, logo o objetivo será determinar se o uso da escala desempenha algum efeito sobre as avaliações.\
+
+### Quando há distribuição normal
+
+#### Obtenção, visualização e seleção dos dados
+
+Os dados serão obtidos de uma planilha excel:
+
+```{r}
+escala <- readxl::read_excel("dados-diversos.xlsx",
+                             sheet = "escala")
+
+glimpse(escala)
+```
+
+Em seguida, será feito um boxplot para rápida visualização do conjunto de dados:
+
+```{r}
+escala %>%
+  ggplot(aes(assessment, acuracia))+
+  geom_boxplot(width = 0.4)
+```
+
+Para condução dos testes, serão selecionadas as colunas "assessment", "rater" e "acuracia", que serão colocados no formato largo.
+
+```{r}
+escala2 <- escala %>%
+  dplyr::select( assessment, rater, acuracia) %>% 
+  pivot_wider(names_from = assessment,
+              values_from = acuracia)
+
+glimpse(escala2)
+```
+
+#### Testar as premissas
+
+#### Teste de normalidade
+
+A avaliação da normalidade será feita estatisticamente, pelo teste de Shapiro Wilk, com valor de significância (⍺) de 5%:
+
+```{r}
+shapiro.test(escala2$Unaided)
+shapiro.test(escala2$Aided1)
+```
+
+Para ambos os tratamentos há normalidade, já que os valores de P foram superiores a 5%.\
+
+#### Teste de homogeneidade
+
+Para avaliação da homogeneidade entre as variâncias, usaremos o teste de variância:
+
+```{r}
+var.test(escala2$Unaided, escala2$Aided1)
+```
+
+O teste de variância demonstra que não há homogeneidade entre os conjuntos de dados, pois o valor de P é menor que 0,05 (5%). Logo, será preciso indicar no teste t que há heterogeneidade.\
+
+#### Teste t pareado
+
+Como demonstrado acima, os dados possuem distribuição normal, portanto ainda é possível utilizar um teste paramétrico. No entanto, não há homogeneidade de variâncias, o que precisará ser indicado na construção da função.
+
+Para executar o teste t pareado utiliza-se a mesma função (`t.test`), incluindo dois parâmetros:
+
+-   `paired = TRUE`, para indicar amostras dependentes (ou pareadas);
+
+-   e `var.equal = FALSE` , para indicar heterocedasticidade.
+
+```{r}
+t.test(escala2$Aided1,escala2$Unaided,
+       paired = TRUE,
+       var.equal = FALSE)
+```
+
+Com o teste, é possível concluir que o uso da escala teve efeito sobre a acurácia dos avaliadores (P-valor = 0.000219), onde foi perceptível um aumento de acurácia após o uso da assistência.\
+
+### Quando **não** há distribuição normal: teste não paramétrico
+
+Para demonstrar essa situação será utilizado um conjunto de dados similar ao exemplo anterior. No entanto, com alguns valores alterados para não possuir mais distribuição normal.
+
+#### Obtenção, visualização e seleção dos dados
+
+```{r}
+escala3 <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=1729131173")
+```
+
+```{r}
+escala3 %>%
+  ggplot(aes(assessment, acuracia))+
+  geom_boxplot(width = 0.4)
+```
+
+```{r}
+
+escala4 <- escala3 %>%
+  dplyr::select(assessment, rater, acuracia) %>% 
+  pivot_wider(names_from = assessment,
+              values_from = acuracia)
+```
+
+#### Testar as premissas
+
+#### Teste de normalidade
+
+```{r}
+shapiro.test(escala4$Unaided)
+shapiro.test(escala4$Aided1)
+```
+
+O teste mostra que não há normalidade para o tratamento "unaided" (valor de p \< 0.05), logo será preciso realizar um **teste não paramétrico**.\
+
+#### Teste de Wilcox
+
+Como o conjunto de dados não possui distribuição normal, será utilizado o teste de Wilcox (`wilcox.test`). Um teste não paramétrico para amostras dependentes.
+
+```{r}
+wilcox.test(escala4$Aided1,
+            escala4$Unaided,
+            paired = TRUE)
+```
+
+Similarmente a situação de normalidade, o teste de Wilcox demonstra que há diferença significativa entre as amostras (P = 0.005 \< ⍺ = 0.05), onde o uso da escala influencia positivamente a acurácia dos avaliadores.
+
+## Análise de Variância (ANOVA)
+
+A análise de variância é adotada quando desejamos comparar três ou mais variáveis quantitativas independentes e que possuem distribuição normal.
+
+### Exemplo 1) sem diferença estatística
+
+### Análise exploratória - obtenção e visualização dos dados
+
+Os dados serão importados de uma planilha excel e apresentam a taxa de crescimento micelial de 5 espécies de *Fusarium*.
+
+```{r}
+micelial <- readxl::read_excel("dados-diversos.xlsx",
+                               sheet = "micelial")
+glimpse(micelial)
+
+#tcm = taxa de crescimento micelial
+```
+
+Para visualização dos dados, será construído um simples gráfico de pontos (`geom_jitter`) ao invés de boxplots (`geom_boxplot`).\
+Como cada tratamento possui em torno de 10 respostas (pontos), esse tipo de gráfico já é suficiente para visualizar a distribuição dos valores.
+
+```{r}
+micelial %>% 
+  ggplot(aes(especie, tcm))+
+  geom_jitter(width = 0.1)
+```
+
+### Análise inferencial - ANOVA
+
+#### Construção do modelo
+
+Antes de realizar a ANOVA, é preciso ajustar um modelo linear (lm). Para isso, será utilizada a função `lm`. Nessa função, os modelos são construídos simbolicamente: com a variável dependente, seguida de um `~`, e a variável independente. Em seguida, informamos no argumento `data` qual o conjunto de dados (data frame) que contém as variáveis do modelo.\
+Essa fórmula será atribuída a um objeto.
+
+```{r}
+m1 <- lm(tcm ~ especie, data = micelial)
+```
+
+#### Avaliação das premissas
+
+Uma vez construído o modelo, é necessário determinar se os dados satisfazem as premissas para proceder a análise de variância.
+
+#### Normalidade
+
+```{r}
+hist(m1$residuals)
+shapiro.test(m1$residuals)
+```
+
+Tanto visualmente, quanto estatisticamente, os resíduos possuem distribuição normal.
+
+#### Homogeneidade
+
+```{r}
+bartlett.test(tcm ~ especie, data = micelial)
+```
+
+O teste de Barlett indica que o conjunto de dados possui homogeneidade de variância.
+
+#### ANOVA
+
+O modelo criado é utilizado dentro da função `anova`:
+
+```{r}
+anova(m1)
+```
+
+Com esse conjunto de dados, é possível concluir que as taxas de crescimento micelial das espécies de *Fusarium* não diferem significativamente entre si (F = 0.1173 \> ⍺ = 0.05).
+
+\
+A função `summary` será aplicada para produzir um sumário dos resultados do modelo ajustado.
+
+```{r}
+summary(m1)
+```
+
+O intercepto indica a média do primeiro nível (*Fasi* = 1.43) e em seguida são apresentados as diferenças para cada nível em relação ao primeiro. Por exemplo, a média da taxa de crescimento micelial do nível *Faus* será 1.15 (1.43 - 0.28).\
+\
+
+O intercepto pode ser removido incluindo `-1` na construção do modelo. Dessa forma, serão apresentados os valores de média de cada nível:
+
+```{r}
+m2 <- lm(tcm ~ especie - 1, data = micelial)
+summary(m2)
+```
+
+### Exemplo 2) com diferença estatística
+
+Um conjunto de dados similar ao anterior será importado de uma planilha online. Nesse novo conjunto os dados foram alterados para apresentarem diferença estatística e avançarmos na análise inferencial.\
+
+### Análise exploratória - obtenção e visualização dos dados
+
+```{r}
+micelial2 <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=959387827")
+
+#tcm = taxa de crescimento micelial
+```
+
+```{r}
+micelial2 %>% 
+  ggplot(aes(especie, tcm))+
+  geom_jitter(width = 0.1)
+```
+
+#### Construção do modelo
+
+```{r}
+m3 <- lm(tcm ~ especie, data = micelial2)
+```
+
+#### Avaliação das premissas
+
+#### Normalidade
+
+```{r}
+hist(m3$residuals)
+shapiro.test(m3$residuals)
+```
+
+Tanto visualmente, quanto estatisticamente, os resíduos possuem distribuição normal.
+
+#### Homogeneidade
+
+```{r}
+bartlett.test(tcm ~ especie, data = micelial2)
+```
+
+O teste de Barlett indica que o conjunto de dados possui homogeneidade de variância.
+
+### Análise inferencial - ANOVA
+
+```{r}
+anova(m3)
+```
+
+```{r}
+summary(m3)
+```
+
+Com esse novo conjunto de dados, conclui-se que as taxas de crescimento micelial das espécies de *Fusarium* diferem significativamente entre si (F = 2.2 \* 10^-7^ \> ⍺ = 0.05). O próximo passo será adotar um teste de comparação de médias para conhecer como as espécies se agrupam quanto as taxas de crescimento.
+
+### Comparação de médias - Teste de Tukey
+
+Para realizar o teste de Tukey, utilizaremos os pacotes `emmeans`, `multcomp` e `multcompview`.
+
+Inicialmente, a função `emmeans` (pacote `emmeans`) será aplicada para estimar as médias de um fator específico em um modelo linear. O resultado será atribuído a um objeto.
+
+```{r}
+medias1 <- emmeans(m3, ~ especie)
+```
+
+Para comparação de médias - Teste de Tukey - será utilizada a função `cld` (pacote `multcomp`).
+
+```{r}
+cld(medias1)
+```
+
+Com o resultado obtido a um nível de significância de 5%, interpretamos que *Fgra* possui a menor taxa de crescimento, em comparação as demais espécies. *Faus*, *Fcor* e *Fmer* possuem taxa de crescimento estatisticamente similar. Já *Fmer* e *Fasi* são estatisticamente similares e possuem a maior taxa de crescimento.
+
+### Alternativas para verificação das premissas
+
+#### Pacote `DHARMa`
+
+```{r}
+plot(simulateResiduals(m3))
+```
+
+#### Pacote `performance`
+
+```{r}
+library(performance)
+check_normality(m3)
+check_heteroscedasticity(m3)
+check_model(m3)
+```

@@ -1,0 +1,11 @@
+---
+title: "FIP 606 | por Caio M."
+---
+
+Este é um site baseado em Quarto. Ele foi criado para armazenar e compartilhar as informações geradas ao longo das aulas da disciplina FIP 606 - Análise e Visualização de Dados em Fitopatologia, oferecida pelo prof. Emerson Del Ponte e cursada durante o primeiro semestre de 2024.
+
+```{r}
+#| echo: false
+#| eval: false
+To learn more about Quarto websites visit https://quarto.org/docs/websites.
+```
