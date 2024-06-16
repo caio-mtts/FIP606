@@ -19,11 +19,11 @@ website:
     style: "docked"
     search: true
     contents:
-      - section: "Basics"
+      - section: "Aulas iniciais"
         contents:
-          - index.qmd
-          - basics-knitr.qmd
-          - basics-jupyter.qmd
+          - Aula 1.qmd
+          - Aula 2.qmd
+          - Aula 3.qmd
       - section: "Análises"
         contents:
           - Aula 10.qmd
