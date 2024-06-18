@@ -40,14 +40,18 @@ website:
             text: Importação de dados e criação de gráficos simples
       - section: "Aula 3"
         contents:
-          - Aula 3.qmd
+          - href: Aula 3.qmd
+            text: Estatísticas descritivas e construção de gráficos simples
       - section: "Aula 4"
         contents:
-          - Aula 4.1.qmd
-          - Aula 4.2.qmd
+          - href: Aula 4.1.qmd
+            text: Uso do datapasta
+          - href: Aula 4.2.qmd
+            text: Tabela de contingência
       - section: "Aula 5"
         contents:
-          - Aula 5.qmd
+          - href: Aula 5.qmd
+            text: Atividade prática
       - section: "Continuar"
         contents:
           - Aula 6.qmd

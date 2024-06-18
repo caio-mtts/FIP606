@@ -1,5 +1,4 @@
 ---
-title: "Aula 3"
 format: html
 editor: visual
 editor_options: 
@@ -8,6 +7,8 @@ execute:
   warning: false
   error: false
 ---
+
+# Aula 3
 
 Nesa aula, serão apresentadas ferramentas para se realizar uma análise descritiva do conjunto de dados. Além disso, o pacote **`tidyverse`** será utilizado para manipulação, criação de subconjuntos e organização dos dados. Por fim, ao longo da aula será demonstrado como criar gráficos simples.
 
