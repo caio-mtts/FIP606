@@ -1,0 +1,81 @@
+---
+title: "Importação de dados"
+author: "Caio"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+# Aula 2
+
+Nesta aula serão apresentadas formas de se importar (carregar) dados/ planilhas, a partir de diferentes fontes, e como fazer uma análise visual rápida dos dados obtidos.
+
+## Importando dados/ planilhas
+
+Os dados/ planilhas podem ser obtidos de diferentes formas.\
+Inicialmente, será carregado um conjunto de dados presente em um pacote do R (**`ec50estimator`**):
+
+```{r}
+#| warning: false
+#| error: false
+
+library(ec50estimator)
+
+df1 <- multi_isolate
+head(df1)
+```
+
+\
+Uma outra maneira, é carregar dados de uma planilha em Excel. Para isso, existem duas alternativas. A primeira faz uso do pacote **`readxl`**.\
+\
+OBS.: Para as opções apresentadas a seguir, é importante mencionar que o arquivo a ser importado deve estar dentro da pasta do projeto.
+
+```{r}
+#| warning: false
+#| error: false
+
+library(readxl)
+df2 <- read_excel("dados-diversos.xlsx")
+head(df2)
+```
+
+\
+Quando uma planilha possui mais de uma guia, é necessário indicar na função qual a guia que desejamos importar:
+
+```{r}
+#| warning: false
+#| error: false
+
+df21 <- read_excel("dados-diversos.xlsx", sheet = "escala")
+head(df21)
+```
+
+\
+A segunda forma de importação, faz uso do pacote **`tidyverse`**, com a função `read_csv`:
+
+```{r}
+#| warning: false
+#| error: false
+
+library(tidyverse)
+df3 <- read_csv("dados-diversos.csv")
+head(df3)
+```
+
+\
+A terceira forma de se carregar dados é a partir de uma planilha google, disponível online.\
+Para isso, fazemos uso do pacote **`gsheet`**:
+
+```{r}
+#| warning: false
+#| error: false
+
+library(gsheet)
+df4 <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1aID5Dh6PlBVCKzU1j7k-WA6zuWQWE2NhtWEgdJtt5iA/edit#gid=921203844")
+head(df4)
+
+
+df5 <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1aID5Dh6PlBVCKzU1j7k-WA6zuWQWE2NhtWEgdJtt5iA/edit#gid=517586736")
+head(df5)
+```

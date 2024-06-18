@@ -1,0 +1,117 @@
+---
+title: "Aula 1"
+format: html
+editor: visual
+---
+
+Nessa primeira aula será feita uma breve introdução aos softwares R e RStudio, apresentando como criar projetos, scripts e arquivos e como salvá-los. Além disso, será demonstrado como instalar e carregar pacotes e criar vetores, data frames e realizar operações básicas no RStudio.\
+
+## Criação do projeto
+
+Inicialmente, será criado um projeto, onde serão mantidos todos os arquivos da disciplina. Para isso, bastar clicar em:
+
+ \> "File"
+
+  \> "New Project..."
+
+   \> "New Directory"
+
+    \> "New Project".\
+     Nessa parte, é dado um nome ao projeto e escolhida a pasta em que ele será mantido. Feito isso, prosseguimos, clicando em "Create Project".\
+
+## Criação dos scripts e documentos
+
+### Scripts
+
+O script é o local onde são desenvolvidos e salvos os códigos. Para criar um novo script no RStudio, clique em:\
+ \> "File"
+
+  \> "New File"
+
+   \> "R Script"\
+
+### Documentos
+
+Ao longo da disciplina, as atividades desenvolvidas serão salvas em documentos. O objetivo é permitir que os códigos desenvolvidos, as análises realizadas e os resultados obtidos, junto com as interpretações e comentários, sejam mantidos em um mesmo arquivo (documento), facilitando o acesso e entendimento do que foi feito.\
+Os formatos dos documentos que podem ser utilizados são "R Markdown" (.rmd) e "Quarto document" (.qmd). Daremos preferência ao último.\
+Portanto, para criar um novo documento em ".qmd", seguiremos o seguinte caminho:\
+ \> "File"
+
+  \> "New File"
+
+   \> "Quarto document..."\
+    Nessa janela, será dado um título ao arquivo, o nome do autor e em seguida, seleciona-se "Create".
+
+O novo documento será salvo na pasta do projeto, criado anteriormente.\
+
+## Instalando e carregando pacotes
+
+Os pacotes são fundamentais para o funcionamento do RStudio, pois contém funções que serão utilizadas em várias análises no decorrer da disciplina.
+
+Um pacote pode ser instalado manualmente, clicando em:\
+ \> "Packages"\
+  \> "Install"\
+    \> Na linha "Packages", digite o nome do pacote de interesse, por exemplo, "Agricolae".\
+    \> Em sequência, clique em "Install"
+
+Outra opção, é realizar a instalação com uma fórmula, como segue:
+
+```{r}
+#| warning: false
+#| message: false
+#| eval: false
+
+install.packages("ggplot2")
+```
+
+Após a instalação, é preciso carregar o pacote, para isso:
+
+```{r}
+#| warning: false
+#| message: false
+#| error: false
+
+library(ggplot2)
+```
+
+## Criando vetores
+
+Para trabalhar no R, algumas vezes devemos criar vetores, segue alguns exemplos simples de como o fazer:
+
+```{r}
+x <- 5
+x
+```
+
+Também é possível criar um vetor com um conjunto de valores:
+
+```{r}
+A <- c(1:20)
+A
+```
+
+No RStudio, também é possível realizar operações com os vetores criados, por exemplo
+
+```{r}
+y <- x^2
+y
+```
+
+```{r}
+z <- y-2*x
+z
+```
+
+```{r}
+B <- A*5
+B
+```
+
+## Criando data frames
+
+Para criação de dataframes, é utilizada a função `data.frame`. Primeiros é dado um nome ao objeto (df), em sequência especificamos o que será colocado nele (os vetores A e B).
+
+```{r}
+df <- data.frame(A,B)
+df
+```
