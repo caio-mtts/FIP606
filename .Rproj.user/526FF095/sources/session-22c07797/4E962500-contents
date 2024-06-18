@@ -9,6 +9,13 @@ execute:
 website:
   title: "FIP 606 | Caio M."
   favicon: fig1.png
+  page-navigation: true
+  back-to-top-navigation: true
+  page-footer:
+    left: "Caio M. Pereira, 2024"
+    right:
+      - icon: github
+        href: https://github.com/caio-mtts
 
   navbar:
     pinned: true
@@ -17,6 +24,16 @@ website:
     left:
       - href: index.qmd
         text: Home
+        
+    right:
+      - icon: mailbox
+        href: mailto:caio.mattos@ufv.br
+      - icon: github
+        href: https://github.com/caio-mtts
+      - icon: linkedin
+        href: https://www.linkedin.com/in/caio-mattos-10001/
+      - icon: link
+        href: https://orcid.org/0000-0002-4347-2492
 
   sidebar:
     style: "docked"
