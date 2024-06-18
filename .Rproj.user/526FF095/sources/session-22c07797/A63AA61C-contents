@@ -1,0 +1,122 @@
+---
+title: "Aula 7"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+---
+
+Nesta aula, será realizada uma análise de variância (ANOVA) usando o conjunto de dados InsectSprays. Serão demonstrados como ajustar um modelo de regressão linear (lm), necessário para a ANOVA, os passos a seguir para verificar as premissas da ANOVA e os testes para comparação de médias que podem ser aplicados. Também serão apresentadas alternativas para a análise dos dados caso não atendam às pressuposições da ANOVA, como transformações, testes não-paramétricos e modelos lineares generalizados. Por fim, será realizada uma análise fatorial com um segundo conjunto de dados.
+
+## Carregando os pacotes
+
+```{r}
+library(gsheet)
+library(tidyverse)
+library(performance)
+library(DHARMa)
+library(emmeans)
+library(multcomp)
+library(multcompView)
+```
+
+## Exemplo de Análise de Variância (ANOVA)
+
+Para realizar a análise de variância (ANOVA), será carregado um conjunto de dados presente no R (conjunto `InsectSprays`), que será atribuído a um objeto:
+
+```{r}
+inseticida <- InsectSprays
+
+inseticida %>% 
+  count(spray)
+```
+
+Com a fórmula `count`, identificamos que nesse conjunto de dados há um fator (inseticida), com 6 níveis (tipos de inseticidas), cada nível com 12 observações.\
+
+## Explorando o conjunto
+
+```{r}
+inseticida %>%
+  ggplot(aes(spray, count))+
+  geom_boxplot(width = 0.5)
+```
+
+Com o boxplot gerado, é possível notar que há tratamentos que diferem dos demais.\
+
+## Ajustar o modelo para ANOVA
+
+Para realizar a ANOVA é preciso ajustar um modelo (`lm`). Isso é necessário para que os resíduos possam ser aplicados nos testes para verificação das premissas da anova. O modelo será atribuído a um objeto.
+
+```{r}
+m1 <- lm(count~spray, data = inseticida)
+summary(m1)
+```
+
+### ANOVA
+
+Uma vez definido o modelo, ele será utilizado como um argumento na função `anova`:
+
+```{r}
+anova(m1)
+```
+
+Com a análise de variância e interpretação da estatística "*F*" é possível dizer que dentre os tratamentos, há algum que difere estatisticamente dos demais.\
+\
+
+## Avaliação das premissas
+
+### Estratégia 1
+
+Primeiro, será analisada a normalidade dos resíduos de maneira visual (função `hist`) e estatisticamente (função `shapiro.test`).
+
+```{r}
+hist(m1$residuals)
+
+shapiro.test(m1$residuals)
+```
+
+Apesar do histograma possuir aspecto de normalidade, o teste de Shapiro-Wilk demonstra que os resíduos não possuem normalidade (valor de P = 0.02).\
+\
+A normalidade também pode ser avaliada visualmente em um gráifco Q-Q, com as funções `qqnorm` e `qqline`:
+
+```{r}
+qqnorm(m1$residuals)
+qqline(m1$residuals)
+```
+
+O gráfico Q-Q mostra que os pontos desviam da linha de normalidade apenas nas regiões extremas, o que justifica o fato do teste de Shapiro-Wilk ter rejeitado a hipótese de normalidade dos resíduos.\
+\
+\
+Em sequência, com o teste de Bartlett (`bartlett.test`), será avaliada a homogeneidade das variâncias entre os grupos:
+
+```{r}
+bartlett.test(count ~ spray,
+              data = inseticida)
+```
+
+O teste de Bartlett demonstra que as variâncias são heterogêneas, pois valor de P é menor que 0.01.
+
+### Estratégia 2
+
+Usando o pacote **`performance`**:
+
+```{r}
+check_normality(m1)
+```
+
+```{r}
+check_heteroscedasticity(m1)
+```
+
+O testes `check_normality` e `check_heteroscedasticity` resultaram em não normalidade dos resíduos e heterocedasticidade entre os grupos.
+
+### Estratégia 3
+
+Com o pacote **`DHARMa`**:
+
+```{r}
+plot(simulateResiduals(m1))
+```
+
+Da mesma forma que as estratégias anteriores, aqui observa-se falta de normalidade e homogeneidade entre as variâncias dos grupos.
