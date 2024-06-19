@@ -1,0 +1,170 @@
+---
+title: "Aula 10"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+---
+
+```{r}
+#| include: false
+#| echo: false
+
+library(gsheet)
+library(tidyverse)
+library(patchwork)
+library(AgroR)
+```
+
+```{r}
+#| include: false
+#| echo: false
+
+corr <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=373270992")
+```
+
+```{r}
+#| include: false
+#| echo: false
+
+campo <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=866852711")
+
+campo2 <- campo |> 
+  dplyr::select(DFC, FER, PROD)
+```
+
+```{r}
+#| include: false
+#| echo: false
+
+estande <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=401662555")
+```
+
+## Modelo não-linear
+
+Aplicação na fitopatologia, em curvas de EC~50~.
+
+```{r}
+fung <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=465348652")
+```
+
+Cálculo da média de germinação em função do isolado.
+
+```{r}
+fung2 <- fung %>% 
+  group_by(code, dose) %>% 
+  summarise(mean_germ = mean(germination))
+```
+
+\
+Visualização da média de germinação com gráfico de pontos
+
+```{r}
+fung2 %>% 
+  ggplot(aes(dose, mean_germ))+
+  geom_point()+
+  facet_wrap(~ code)
+```
+
+### Modelagem da EC~50~ (modelo não-linear)
+
+Para modelar a EC~50~ será utilizado o pacote **`drc`**, com a função `drm`.
+
+Antes, é preciso criar um novo objeto somente com os dados do isolado selecionado (ex.: FGT05). Em seguida, definimos na função `drm` que a germinação média será modela em função da dose, qual o conjunto de dados (`data = FGT05`) e qual a função utilizada (no caso, `fct = LL.3()`).
+
+```{r}
+library(drc)
+
+FGT05 <- fung2 %>% 
+  filter(code =="FGT05")
+
+drc_fgt05 <- drm(mean_germ ~ dose,
+                 data = FGT05,
+                 fct = LL.3())
+
+summary(drc_fgt05)
+AIC(drc_fgt05)
+plot(drc_fgt05)
+```
+
+É importante definir a função para comparar os modelos e selecionar aquele mais simples (com menor AIC).
+
+### Cálculo de EC~50~
+
+Será utilizada a função `ED` pacote (**`drc`**).
+
+Seleciona-se o objeto, o valor da varíavel resposta (50), e o tipo de intervalo de confiança que será apresentado.
+
+```{r}
+ED(drc_fgt05, 50, interval = "delta")
+```
+
+No caso, a dose que inibe 50% da germinação de conídios foi estimada em 0.04, com -0.01 \< IC \< 0.10.
+
+#### Outros exemplos
+
+```{r}
+I_165 <- fung2 %>% 
+  filter(code =="165")
+
+drc_165 <- drm(mean_germ ~ dose,
+                 data = I_165,
+                 fct = LL.3())
+
+summary(drc_165)
+AIC(drc_165)
+plot(drc_165)
+
+ED(drc_165,50, interval = "delta")
+```
+
+```{r}
+I_186 <- fung2 %>% 
+  filter(code =="186")
+
+drc_186 <- drm(mean_germ ~ dose,
+                 data = I_186,
+                 fct = LL.3())
+
+summary(drc_186)
+AIC(drc_186)
+plot(drc_186)
+
+ED(drc_186, 50, interval = "delta")
+```
+
+### Calculando os EC~50~ de uma só vez
+
+Pelo método anterior, é preciso modelar o EC~50~ individualmente, o que pode ser trabalhoso, dependendo do número de amostras. Assim, o pacote **`ec50estimator`** é útil nessa situações, pois permite modelar, calcular a EC~50~ e o IC de todos os tratamento de uma só vez.
+
+```{r}
+library(ec50estimator)
+
+df_ec50 <- estimate_EC50(mean_germ~dose,
+                         data = fung2,
+                         isolate_col = "code",
+                         interval = "delta",
+                         fct = drc::LL.3())
+view(df_ec50)
+
+library(DT)
+datatable(df_ec50)
+```
+
+Problema, não é possível selecionar a função de cada modelo para melhor se adequar a cada tratamento.
+
+Gráfico com as doses de EC~50~ e intervalo de confiança:
+
+```{r}
+df_ec50 %>% 
+  ggplot(aes(reorder(ID, Estimate), Estimate))+
+  geom_point()+
+  geom_errorbar(aes(ymin = Lower,
+                    ymax = Upper),
+                width = 0.1)+
+  ylim (0, 1.2)+
+  coord_flip()
+```
+
+Argumento `reorder(ID, Estimate), Estimate` , utilizado para ordenar os tratamentos em função da resposta (ordem crescente).

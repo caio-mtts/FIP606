@@ -1,0 +1,132 @@
+---
+title: "Aula 8"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+#| echo: false
+
+library(gsheet)
+library(tidyverse)
+library(patchwork)
+library(performance)
+library(DHARMa)
+library(emmeans)
+library(multcomp)
+library(multcompView)
+library(MASS)
+library(epifitter)
+```
+
+## Curva de progresso da doença
+
+### Importando os dados
+
+Para construção de uma curva de progresso da doença usaremos como exemplo um conjunto de dados que descreve diferentes métodos de irrigação (variável independente, um fator, 2 níveis) e seu efeito sobre a severidade (variável dependente) ao longo dos dias.
+
+```{r}
+curve <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=1807247585")
+
+curve$severity2 <- (curve$severity*100)
+```
+
+Como os dados de severidade são apresentados em valores decimais, é possível colocá-los em porcentagem fazendo multiplicação por 100.
+
+Para construir a curva, primeiro é preciso agrupar os dados (`group_by`) em função do método de irrigação e do dia. Em seguida, é calculada a média em função das mesmas variáveis (dia e irrigação) com a função `summarise(sev_mean = mean(sev_X))`.
+
+```{r}
+curve2 <- curve %>% 
+  group_by(Irrigation, day) %>% 
+  summarise(sev_mean = mean(severity))
+
+curve2
+```
+
+### Visualização gráfica
+
+Para conhecer o comportamento da severidade ao longo do tempo, será construído um gráfico de pontos (`geom_point`) e linhas (`geom_line`), diferenciando os tratamentos ("Irrigation") pela cor:
+
+```{r}
+curve2 %>% 
+  ggplot(aes(day, sev_mean, colour = Irrigation))+
+  geom_point()+
+  geom_line()
+```
+
+Ou, uma figura com dois gráficos. Um para cada nível do fator "Irrigation":
+
+```{r}
+curve2 %>% 
+  ggplot(aes(day, sev_mean))+
+  geom_point()+
+  geom_line()+
+  facet_wrap(~Irrigation)
+
+```
+
+### Cálculo da área abaixo da curva de progresso da doença
+
+Para o cálculo da área abaixo da curva de progresso da doença (AACPD, ou "*area under the disease progress curve",* AUDPC), será criado um novo dataframe. Para isso, será feito o agrupamento (`group_by`) das variáveis em função do tratamento ("Irrigation") e das repetições ("rep"). Em seguida, será utilizada a função `summarise` para o cálculo da AACPD (função `AUDPC`, pacote **`epifitter`**).
+
+```{r}
+curve3 <- curve %>% 
+  group_by(Irrigation, rep) %>% 
+  summarise(aacpd = AUDPC(day, severity))
+
+curve3
+```
+
+### ANOVA
+
+Antes de realizar análise de variância é preciso estabelece um modelo, o que será com os valores de AACPD e a função (`lm`):
+
+```{r}
+m_curve <- lm(aacpd ~ Irrigation+factor(rep),
+              data = curve3)
+```
+
+#### Avaliação das pressuposições
+
+Com funções do pacote **`Performance`**:
+
+```{r}
+check_normality(m_curve)
+check_heteroscedasticity(m_curve)
+```
+
+Com o pacote **`DHARMa`**:
+
+```{r}
+plot(simulateResiduals(m_curve))
+```
+
+Com o teste de Shapiro-Wilk (`shapiro.test`) e o teste de Bartlett (`bartlett.test`):
+
+```{r}
+shapiro.test(m_curve$residuals)
+bartlett.test (aacpd ~ Irrigation,
+               data = curve3)
+```
+
+Ambas as metodologias demonstram que os dados seguem distribuição normal e possuem homocedasticidade, logo é possível proceder análise de variância.
+
+#### ANOVA
+
+```{r}
+anova(m_curve)
+```
+
+A ANOVA mostra que não há diferença entre as áreas.
+
+```{r}
+agricolae::cv.model(m_curve)
+```
+
+O que poderia ser explicado pelo coeficiente de variação do experimento, que foi muito baixo (CV = 1.09 %).

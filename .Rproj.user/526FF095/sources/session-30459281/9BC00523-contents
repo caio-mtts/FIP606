@@ -1,0 +1,364 @@
+---
+title: "Aula 10"
+format: html
+editor: visual
+execute: 
+  error: false
+  warning: false
+---
+
+# Aula 10
+
+```{r}
+library(gsheet)
+library(tidyverse)
+library(patchwork)
+library(AgroR)
+```
+
+## Análise de correlação
+
+```{r}
+corr <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=373270992")
+```
+
+### Análise exploratória - Visualização gráfica
+
+#### Gráfico de Correlação
+
+Considerando o software "Assess" como o padrão, serão feitos gráficos de correlação entre ele e os outros softwares, "LeafDoctor" e "ImageJ". O objetivo é verificar se os métodos possuem alguma correlação com o "Assess" e se essa correlação é positiva ou negativa.
+
+```{r}
+g1 <- corr %>% 
+  ggplot(aes(Assess, LeafDoctor))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+g1
+```
+
+```{r}
+g2 <- corr %>% 
+  ggplot(aes(Assess, ImageJ))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+g2
+```
+
+Os gráficos acima demonstram que os softwares avaliados possuem correlação positiva com o software "Assess".
+
+#### Boxplot
+
+Será construído um boxplot para verificar a variabilidade dos dados em função do método (software).
+
+```{r}
+g3 <- corr %>%
+  pivot_longer(3:5, names_to = "method",
+               values_to = "value") %>% 
+  ggplot(aes(method , value))+
+  geom_boxplot()
+
+g3
+```
+
+Com o pacote **`patchwork`** será feito um plot contendo os três gráficos gerados anteriormente:
+
+```{r}
+g3 + (g1/g2)
+```
+
+### Coeficiente de correlação (r)
+
+O coeficiente de correlação (ou correlação de Pearson) varia entre -1 e +1. Se o valor for negativo, há correlação negativa; caso seja positivo, a correlação será positiva. Além disso, quanto mais próximo às extremidades (-1 ou +1), mais forte será a correlação.
+
+Uma opção para obter os coeficientes de correlação (r) é adotar a função `cor.test` (nativa do R):
+
+```{r}
+cor.test(corr$Assess, corr$LeafDoctor)
+```
+
+```{r}
+cor.test(corr$Assess, corr$ImageJ)
+```
+
+Pelo coeficientes obtidos, é possível dizer que os softwares possuem correlação positiva e forte, pois os valores
+
+#### Gráficos para apresentar os coeficientes de correlações entre os métodos
+
+Com **`AgroR`**:
+
+Antes é preciso criar um objeto com os coeficientes de correlação.
+
+```{r}
+corr %>% 
+  select(3:5) %>%
+  corgraph()
+
+
+#ou#
+
+
+corr2 <- corr %>%
+  select(3:5)
+
+corgraph(corr2)
+```
+
+Com **`corrplot`**:
+
+```{r}
+library(corrplot)
+
+corr2_1 <- cor(corr2)
+corrplot(corr2_1, method = "square", type = "upper")
+```
+
+Alterando alguns parâmetros na função (conferir o help, pois há outras variações possíveis):
+
+-   O argumento `diag = FALSE` remove a comparação dentro de um mesmo método, por exemplo, Assess com Assess.
+
+```{r}
+corrplot(corr2_1, method = "number", type = "upper", diag = FALSE)
+```
+
+### Exemplo 02
+
+Um outro exemplo de correlação, com o conjunto de dados de aulas passadas.
+
+```{r}
+campo <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=866852711")
+
+campo2 <- campo |> 
+  dplyr::select(DFC, FER, PROD)
+```
+
+Com `corgraph`
+
+```{r}
+corgraph(campo2)
+```
+
+Com `corrplot`
+
+```{r}
+campo2_1 <- cor(campo2)
+campo2_1 %>% corrplot(method = "number", type = "lower", diag = FALSE)
+```
+
+#### Comparação de correlações
+
+```{r}
+cor.test(campo2$PROD, campo2$DFC)
+cor.test(campo2$PROD, campo2$FER)
+```
+
+Avalia-se os intervalos de confiança obtidos (IC da correlação entre PROD e DFC *vs.* IC da correlação entre PROD e FER) e caso não haja sobreposição de intervalos, as correlações diferem estatisticamente.
+
+\_\_\_\_
+
+## Regressão linear de segunda ordem (quadrática)
+
+```{r}
+estande <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=401662555")
+```
+
+Na aula anterior, foi visto que o ensaio 2 não apresentava uma tendência linear.\
+Esse ensaio será utilizado para exemplificar uma regressão linear de segunda ordem.
+
+```{r}
+exp2 <- estande %>% 
+  filter(exp == 2)
+```
+
+```{r}
+exp2 %>% 
+  ggplot(aes(trat, nplants))+
+  geom_point()+
+  ylim(0,100)+
+  geom_smooth(method = "lm",
+              se = F,
+              color = "green",
+              formula = y ~ poly(x,2))+
+  geom_smooth(method = "lm",
+              se = F,
+              color = "red")
+```
+
+Em vermelho, a linha que indica o modelo linear de primeira ordem. Em verde, o modelo linear de segunda ordem.
+
+### Modelo linear
+
+```{r}
+lm2 <- lm(nplants ~ trat,
+          data = exp2)
+
+summary(lm2)
+```
+
+Como o resultado demonstra, para o modelo linear, o coeficiente de determinação é baixo (R^2^ = 0.43) , logo boa parte da variação dos dados não são explicados por esse modelo.
+
+### Modelo quadrático
+
+Para construir o modelo quadrático é preciso acrescentar uma coluna ao conjunto de dados, onde a varíavel independente (nesse caso, trat) será elevada ao quadrado. Isso é necessário para obtermos um segundo coeficiente no momento de criar o modelo.
+
+```{r}
+exp2$trat2 <- exp2$trat^2
+```
+
+```{r}
+lm2_quad <- lm(nplants ~ trat + trat2,
+               data = exp2)
+summary(lm2_quad)
+```
+
+Com a função `polynomial` (**`AgroR`**):
+
+```{r}
+with(exp2, polynomial(trat, nplants, grau = 2))
+```
+
+### Comparando os AICs
+
+```{r}
+AIC(lm2)
+AIC(lm2_quad)
+```
+
+Pelo teste de AIC, em comparação ao modelo linear, o modelo quadrático explica melhor a variação dos dados, pois AIC(lm2_quad) \< AIC(lm2).
+
+#### Modelo de terceira ordem - teste
+
+```{r}
+with(exp2, polynomial(trat, nplants, grau = 3))
+```
+
+Apesar do polinômio de grau 3 explicar melhor os dados, o modelo não possui explicação biológica plausível (do estande de plantas aumentar em função do aumento do inóculo para depois decrescer).
+
+## Modelo não-linear
+
+Aplicação na fitopatologia, em curvas de EC~50~.
+
+```{r}
+fung <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=465348652")
+```
+
+Cálculo da média de germinação em função do isolado.
+
+```{r}
+fung2 <- fung %>% 
+  group_by(code, dose) %>% 
+  summarise(mean_germ = mean(germination))
+```
+
+\
+Visualização da média de germinação com gráfico de pontos
+
+```{r}
+fung2 %>% 
+  ggplot(aes(dose, mean_germ))+
+  geom_point()+
+  facet_wrap(~ code)
+```
+
+### Modelagem da EC~50~ (modelo não-linear)
+
+Para modelar a EC~50~ será utilizado o pacote **`drc`**, com a função `drm`.
+
+Antes, é preciso criar um novo objeto somente com os dados do isolado selecionado (ex.: FGT05). Em seguida, definimos na função `drm` que a germinação média será modela em função da dose, qual o conjunto de dados (`data = FGT05`) e qual a função utilizada (no caso, `fct = LL.3()`).
+
+```{r}
+library(drc)
+
+FGT05 <- fung2 %>% 
+  filter(code =="FGT05")
+
+drc_fgt05 <- drm(mean_germ ~ dose,
+                 data = FGT05,
+                 fct = LL.3())
+
+summary(drc_fgt05)
+AIC(drc_fgt05)
+plot(drc_fgt05)
+```
+
+É importante definir a função para comparar os modelos e selecionar aquele mais simples (com menor AIC).
+
+### Cálculo de EC~50~
+
+Será utilizada a função `ED` pacote (**`drc`**).
+
+Seleciona-se o objeto, o valor da varíavel resposta (50), e o tipo de intervalo de confiança que será apresentado.
+
+```{r}
+ED(drc_fgt05, 50, interval = "delta")
+```
+
+No caso, a dose que inibe 50% da germinação de conídios foi estimada em 0.04, com -0.01 \< IC \< 0.10.
+
+#### Outros exemplos
+
+```{r}
+I_165 <- fung2 %>% 
+  filter(code =="165")
+
+drc_165 <- drm(mean_germ ~ dose,
+                 data = I_165,
+                 fct = LL.3())
+
+summary(drc_165)
+AIC(drc_165)
+plot(drc_165)
+
+ED(drc_165,50, interval = "delta")
+```
+
+```{r}
+I_186 <- fung2 %>% 
+  filter(code =="186")
+
+drc_186 <- drm(mean_germ ~ dose,
+                 data = I_186,
+                 fct = LL.3())
+
+summary(drc_186)
+AIC(drc_186)
+plot(drc_186)
+
+ED(drc_186, 50, interval = "delta")
+```
+
+### Calculando os EC~50~ de uma só vez
+
+Pelo método anterior, é preciso modelar o EC~50~ individualmente, o que pode ser trabalhoso, dependendo do número de amostras. Assim, o pacote **`ec50estimator`** é útil nessa situações, pois permite modelar, calcular a EC~50~ e o IC de todos os tratamento de uma só vez.
+
+```{r}
+library(ec50estimator)
+
+df_ec50 <- estimate_EC50(mean_germ~dose,
+                         data = fung2,
+                         isolate_col = "code",
+                         interval = "delta",
+                         fct = drc::LL.3())
+view(df_ec50)
+
+library(DT)
+datatable(df_ec50)
+```
+
+Problema, não é possível selecionar a função de cada modelo para melhor se adequar a cada tratamento.
+
+Gráfico com as doses de EC~50~ e intervalo de confiança:
+
+```{r}
+df_ec50 %>% 
+  ggplot(aes(reorder(ID, Estimate), Estimate))+
+  geom_point()+
+  geom_errorbar(aes(ymin = Lower,
+                    ymax = Upper),
+                width = 0.1)+
+  ylim (0, 1.2)+
+  coord_flip()
+```
+
+Argumento `reorder(ID, Estimate), Estimate` , utilizado para ordenar os tratamentos em função da resposta (ordem crescente).
