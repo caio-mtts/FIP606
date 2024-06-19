@@ -26,14 +26,13 @@ website:
         text: Home
         
     right:
-      - icon: mailbox
+      - icon: envelope-at
         href: mailto:caio.mattos@ufv.br
       - icon: github
         href: https://github.com/caio-mtts
       - icon: linkedin
         href: https://www.linkedin.com/in/caio-mattos-10001/
-      - icon: link
-        href: https://orcid.org/0000-0002-4347-2492
+
 
   sidebar:
     style: "docked"
