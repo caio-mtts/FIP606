@@ -393,8 +393,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./Aula 9.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">continuar</span></a>
+  <a href="./Aula 9.1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estatística inferencial - Experimento em parcelas subdivididas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Aula 9.2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estatística inferencial - Regressão linear</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Aula 9.3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estatística inferencial - Análise de múltiplos ensaios</span></a>
   </div>
 </li>
       </ul>
@@ -454,6 +466,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#modelo-não-linear" id="toc-modelo-não-linear" class="nav-link active" data-scroll-target="#modelo-não-linear">Modelo não-linear</a>
   <ul class="collapse">
+  <li><a href="#importação-e-preparação-dos-dados-para-análise" id="toc-importação-e-preparação-dos-dados-para-análise" class="nav-link" data-scroll-target="#importação-e-preparação-dos-dados-para-análise">Importação e preparação dos dados para análise</a></li>
   <li><a href="#modelagem-da-ec50-modelo-não-linear" id="toc-modelagem-da-ec50-modelo-não-linear" class="nav-link" data-scroll-target="#modelagem-da-ec50-modelo-não-linear">Modelagem da EC<sub>50</sub> (modelo não-linear)</a></li>
   <li><a href="#cálculo-de-ec50" id="toc-cálculo-de-ec50" class="nav-link" data-scroll-target="#cálculo-de-ec50">Cálculo de EC<sub>50</sub></a></li>
   <li><a href="#calculando-os-ec50-de-uma-só-vez" id="toc-calculando-os-ec50-de-uma-só-vez" class="nav-link" data-scroll-target="#calculando-os-ec50-de-uma-só-vez">Calculando os EC<sub>50</sub> de uma só vez</a></li>
@@ -485,7 +498,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="modelo-não-linear" class="level2">
 <h2 class="anchored" data-anchor-id="modelo-não-linear">Modelo não-linear</h2>
-<p>Aplicação na fitopatologia, em curvas de EC<sub>50</sub>.</p>
+<p>Na fitopatologia, modelos não-lineares podem ser utilizados para a construção de curvas de EC<sub>50</sub>.</p>
+<section id="importação-e-preparação-dos-dados-para-análise" class="level3">
+<h3 class="anchored" data-anchor-id="importação-e-preparação-dos-dados-para-análise">Importação e preparação dos dados para análise</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fung <span class="ot">&lt;-</span> <span class="fu">gsheet2tbl</span>(<span class="st">"https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=465348652"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -510,6 +525,7 @@ Visualização da média de germinação com gráfico de pontos</p>
 </div>
 </div>
 </div>
+</section>
 <section id="modelagem-da-ec50-modelo-não-linear" class="level3">
 <h3 class="anchored" data-anchor-id="modelagem-da-ec50-modelo-não-linear">Modelagem da EC<sub>50</sub> (modelo não-linear)</h3>
 <p>Para modelar a EC<sub>50</sub> será utilizado o pacote <strong><code>drc</code></strong>, com a função <code>drm</code>.</p>

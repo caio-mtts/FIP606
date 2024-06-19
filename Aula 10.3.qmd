@@ -43,7 +43,9 @@ estande <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW
 
 ## Modelo não-linear
 
-Aplicação na fitopatologia, em curvas de EC~50~.
+Na fitopatologia, modelos não-lineares podem ser utilizados para a construção de curvas de EC~50~.
+
+### Importação e preparação dos dados para análise
 
 ```{r}
 fung <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit#gid=465348652")
