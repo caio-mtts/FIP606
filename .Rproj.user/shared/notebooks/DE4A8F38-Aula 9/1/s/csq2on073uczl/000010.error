@@ -1,1 +1,0 @@
-{"frames":[],"message":"Error in lmer(yld ~ inc + (inc | study), data = wm, REML = F) : \n  não foi possível encontrar a função \"lmer\"\n"}

@@ -1,5 +1,0 @@
-"0","mofo3 <- lmer(yld ~ inc + (inc | study), data = wm,"
-"0","              REML = F)"
-"2","Error in lmer(yld ~ inc + (inc | study), data = wm, REML = F) : 
-  não foi possível encontrar a função ""lmer""
-"
