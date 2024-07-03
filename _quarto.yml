@@ -58,23 +58,23 @@ website:
         contents:
           - href: Aula 3.qmd
             text: Estatísticas descritivas e construção de gráficos simples
-      - section: "Aula 4"
+      - section: "Aula 04"
         contents:
           - href: Aula 4.1.qmd
             text: Uso do datapasta
           - href: Aula 4.2.qmd
             text: Tabela de contingência
-      - section: "Aula 5"
+      - section: "Aula 05"
         contents:
           - href: Aula 5.qmd
             text: Atividade prática
-      - section: "Aula 6"
+      - section: "Aula 06"
         contents:
           - href: Aula 6.1.qmd
             text: Estatística inferencial - Teste t
           - href: Aula 6.2.qmd
             text: Estatística inferencial - Análise de variância
-      - section: "Aula 7"
+      - section: "Aula 07"
         contents:
           - href: Aula 7.1.qmd
             text: Estatística inferencial - Análise de variância
@@ -82,13 +82,13 @@ website:
             text: Estatística inferencial - Alternativas de análise
           - href: Aula 7.3.qmd
             text: Estatística inferencial - Experimento fatorial
-      - section: "Aula 8"
+      - section: "Aula 08"
         contents:
           - href: Aula 8.1.qmd
             text: Estatística inferencial - Experimento em DBC
           - href: Aula 8.2.qmd
             text: Curva de progresso da doença
-      - section: "Aula 9"
+      - section: "Aula 09"
         contents:
           - href: Aula 9.1.qmd
             text: Estatística inferencial - Experimento em parcelas subdivididas
